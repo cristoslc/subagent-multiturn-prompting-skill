@@ -40,8 +40,9 @@
         "agent_behavior": [
           "Detects the repeating pattern (identical 5-line blocks or copy-paste mid-output) in the subagent's response",
           "First retries the same turn with temperature increased by +0.1",
-          "If degenerate output persists, switches to an alternative model profile if one exists for this role",
-          "If both recovery attempts fail, escalates to the user with a clear diagnostic: which turn, which model, what temperature, and the recovery actions attempted",
+          "If retry still degenerates, reduces max_tokens for that turn (halves the budget)",
+          "If reducing tokens also fails, switches model — e.g. for critic (Gemma4), switch to DeepSeek-Coder",
+          "If all three recovery attempts fail, escalates to the user with a clear diagnostic: which turn, which model, what temperature, and the recovery actions attempted",
           "Does NOT silently advance to the next turn when output is degenerate"
         ]
       }
