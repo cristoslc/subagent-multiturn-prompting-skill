@@ -1,0 +1,91 @@
+{
+  "skill_name": "subagent-orchestrator",
+  "tests": [
+    {
+      "id": "beh-001",
+      "name": "routes-single-turn-to-push-model",
+      "given": "A user asks: 'Explore the Portland shipbuilding ecosystem — who are the key players, what yards are active?'",
+      "when": "The subagent-orchestrator skill activates",
+      "then": {
+        "agent_behavior": [
+          "Classifies the task as a single self-contained turn per the push vs pull decision tree",
+          "Routes it to push-model dispatch (direct ACP prompt or dispatch-opencode) rather than constructing an OrchestrationSpec",
+          "Does NOT construct a multi-turn spec or enter phase-state orchestration",
+          "Returns findings in a fire-and-forget manner with no phase-state loop"
+        ]
+      }
+    },
+    {
+      "id": "beh-002",
+      "name": "multi-turn-critic-with-phase-state",
+      "given": "A user asks: 'Critique these 4 exploration outputs — check each against sources, flag contradictions, then synthesize a brief.'",
+      "when": "The subagent-orchestrator skill activates",
+      "then": {
+        "agent_behavior": [
+          "Identifies this as a multi-turn critic workflow requiring pull-model phase-state orchestration",
+          "Constructs OrchestrationSpec with profile=critic (Gemma4, agent=general, temp=0.4) and 5 turns: one per exploration output + synthesis",
+          "Dispatches Turn 1 with a small initial prompt (~300 tokens), waits for subagent to declare phase=verify_complete",
+          "Serves Turn 2 with prior turn output included in context, without re-sending the full task specification",
+          "Continues turn sequencing until Turn 5 (synthesis) completes with phase=done",
+          "Returns the synthesized brief to the user without exposing intermediate phase-state mechanics"
+        ]
+      }
+    },
+    {
+      "id": "beh-003",
+      "name": "handles-degenerate-output-escalation",
+      "given": "A subagent in the critic profile returns repetitive looping output on Turn 3 of a multi-turn orchestration",
+      "when": "The subagent-orchestrator skill detects degenerate output",
+      "then": {
+        "agent_behavior": [
+          "Detects the repeating pattern (identical 5-line blocks or copy-paste mid-output) in the subagent's response",
+          "First retries the same turn with temperature increased by +0.1",
+          "If degenerate output persists, switches to an alternative model profile if one exists for this role",
+          "If both recovery attempts fail, escalates to the user with a clear diagnostic: which turn, which model, what temperature, and the recovery actions attempted",
+          "Does NOT silently advance to the next turn when output is degenerate"
+        ]
+      }
+    },
+    {
+      "id": "beh-004",
+      "name": "prevents-simultaneous-model-oom",
+      "given": "A user asks: 'Run the explorer on this codebase and simultaneously have the critic evaluate it.' with hardware constraints where Gemma4 (15 GB) + DeepSeek-Coder (8.85 GB) would exceed available Metal RAM",
+      "when": "The subagent-orchestrator skill evaluates the request",
+      "then": {
+        "agent_behavior": [
+          "Checks the combined memory footprint of requested profiles against available Metal RAM",
+          "Warns the user: 'Gemma4 (15 GB) and DeepSeek-Coder (8.85 GB) cannot load simultaneously on this hardware (23.85 GB total exceeds ~22 GB Metal budget)'",
+          "Proposes a sequential alternative: 'Run explorer first, hot-switch to critic after exploration completes.'",
+          "Does NOT attempt to load both models at the same time"
+        ]
+      }
+    },
+    {
+      "id": "beh-005",
+      "name": "distinguishes-push-vs-pull-dispatch",
+      "given": "A user asks: 'Run a code review on this PR' and also asks: 'Run a multi-pass research analysis with verification across 3 sources'",
+      "when": "The subagent-orchestrator skill evaluates each task",
+      "then": {
+        "agent_behavior": [
+          "Routes the PR review task as a push-model dispatch (single self-contained turn, no phase-state needed — may delegate to dispatch-opencode or direct ACP prompt)",
+          "Routes the multi-pass research as a pull-model orchestration (multiple turns, verification phases, incremental context delivery)",
+          "Explains to the user why each routing decision was made when asked"
+        ]
+      }
+    },
+    {
+      "id": "beh-006",
+      "name": "validates-orchestration-spec-before-dispatch",
+      "given": "A user provides an orchestration specification file or JSON blob",
+      "when": "The subagent-orchestrator skill processes the spec",
+      "then": {
+        "agent_behavior": [
+          "Calls scripts/validate-orchestration-spec.sh with the spec file or stdin",
+          "If validation passes (exit 0), proceeds with dispatch",
+          "If validation fails (exit 1), reports the specific errors from the JSON error list to the user",
+          "If degenerate_risk flags are missing but profiles exist, warns the user rather than silently proceeding"
+        ]
+      }
+    }
+  ]
+}
