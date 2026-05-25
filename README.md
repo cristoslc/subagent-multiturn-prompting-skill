@@ -1,4 +1,4 @@
-# subagent-orchestrator
+# subagent-multiturn-prompting
 
 Temporal steer-by-wire for multi-model subagent fleets.
 
@@ -21,23 +21,23 @@ Read `PURPOSE.md` for the architectural thesis and `ABSTRACTIONS.md` for data st
 
 ## Key References
 
-- `skills/subagent-orchestrator/SKILL.md` — skill definition loaded by the host agent
-- `skills/subagent-orchestrator/spec.md` — intent, boundaries, and script contracts
-- `skills/subagent-orchestrator/references/orchestration-spec-schema.md` — complete field reference
-- `skills/subagent-orchestrator/references/model-profiles.md` — default profile registry and hardware constraints
+- `skills/subagent-multiturn-prompting/SKILL.md` — skill definition loaded by the host agent
+- `skills/subagent-multiturn-prompting/spec.md` — intent, boundaries, and script contracts
+- `skills/subagent-multiturn-prompting/references/orchestration-spec-schema.md` — complete field reference
+- `skills/subagent-multiturn-prompting/references/model-profiles.md` — default profile registry and hardware constraints
 - Related: `../dispatch-opencode-skill/` — ACP transport adapter (complement, not dependency)
 - Transport: `acpx` — the ACP client this orchestrator will call (https://github.com/nicolaide/acpx)
 
 ## Project Layout
 
 ```
-subagent-orchestrator-skill/
+subagent-multiturn-prompting-skill/
 ├── README.md              # this file
 ├── PURPOSE.md             # architectural thesis and constraints
 ├── ARCHITECTURE.md        # layer stack, core loop, MCP tool surface
 ├── ABSTRACTIONS.md        # data structures and detection algorithms
 ├── skills/
-│   └── subagent-orchestrator/
+│   └── subagent-multiturn-prompting/
 │       ├── SKILL.md       # skill definition (complete)
 │       ├── spec.md        # lightweight intent + script contracts
 │       ├── references/

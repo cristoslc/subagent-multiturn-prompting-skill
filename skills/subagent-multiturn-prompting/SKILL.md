@@ -1,5 +1,5 @@
 ---
-name: subagent-orchestrator
+name: subagent-multiturn-prompting
 description: Temporal steer-by-wire layer for multi-turn, multi-model subagent dispatch using a pull-model phase-state protocol. Constructs OrchestrationSpecs, routes tasks to model profiles (explorer/critic/thinker/fast_code), manages model lifecycle on constrained hardware, detects degenerate output and escalates, and validates specs before dispatch. Use when dispatching subagents that need incremental context delivery, multi-step verification, or per-turn model/temperature configuration. Do NOT use for simple single-turn self-contained tasks — use direct subagent dispatch or dispatch-opencode instead.
 license: MIT
 compatibility: opencode
@@ -15,7 +15,7 @@ allowed-tools:
   - Glob
 ---
 
-# subagent-orchestrator
+# subagent-multiturn-prompting
 
 You orchestrate multi-turn, multi-model subagent dispatch using a pull-model phase-state protocol. The parent agent gives you a task; you decide whether it needs push-model dispatch (single self-contained turn) or pull-model orchestration (multi-turn with incremental context delivery).
 
@@ -23,7 +23,7 @@ You orchestrate multi-turn, multi-model subagent dispatch using a pull-model pha
 
 Before constructing any spec, classify the task:
 
-| Characteristic | Push model (direct / dispatch-opencode) | Pull model (subagent-orchestrator) |
+| Characteristic | Push model (direct / dispatch-opencode) | Pull model (subagent-multiturn-prompting) |
 |---|---|---|
 | Turns | 1 self-contained turn | 2+ turns with phase-state control |
 | Models | Single model | Multiple models or per-turn reconfiguration |
@@ -79,7 +79,7 @@ prompt_template: "Critique this exploration. Flag contradictions, check sources,
 Before dispatch, always call the validation script:
 
 ```bash
-bash skills/subagent-orchestrator/scripts/validate-orchestration-spec.sh <spec-file>
+bash skills/subagent-multiturn-prompting/scripts/validate-orchestration-spec.sh <spec-file>
 ```
 
 Interpret results:

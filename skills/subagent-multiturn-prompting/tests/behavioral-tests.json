@@ -1,11 +1,11 @@
 {
-  "skill_name": "subagent-orchestrator",
+  "skill_name": "subagent-multiturn-prompting",
   "tests": [
     {
       "id": "beh-001",
       "name": "routes-single-turn-to-push-model",
       "given": "A user asks: 'Explore the Portland shipbuilding ecosystem — who are the key players, what yards are active?'",
-      "when": "The subagent-orchestrator skill activates",
+      "when": "The subagent-multiturn-prompting skill activates",
       "then": {
         "agent_behavior": [
           "Classifies the task as a single self-contained turn per the push vs pull decision tree",
@@ -19,7 +19,7 @@
       "id": "beh-002",
       "name": "multi-turn-critic-with-phase-state",
       "given": "A user asks: 'Critique these 4 exploration outputs — check each against sources, flag contradictions, then synthesize a brief.'",
-      "when": "The subagent-orchestrator skill activates",
+      "when": "The subagent-multiturn-prompting skill activates",
       "then": {
         "agent_behavior": [
           "Identifies this as a multi-turn critic workflow requiring pull-model phase-state orchestration",
@@ -35,7 +35,7 @@
       "id": "beh-003",
       "name": "handles-degenerate-output-escalation",
       "given": "A subagent in the critic profile returns repetitive looping output on Turn 3 of a multi-turn orchestration",
-      "when": "The subagent-orchestrator skill detects degenerate output",
+      "when": "The subagent-multiturn-prompting skill detects degenerate output",
       "then": {
         "agent_behavior": [
           "Detects the repeating pattern (identical 5-line blocks or copy-paste mid-output) in the subagent's response",
@@ -51,7 +51,7 @@
       "id": "beh-004",
       "name": "prevents-simultaneous-model-oom",
       "given": "A user asks: 'Run the explorer on this codebase and simultaneously have the critic evaluate it.' with hardware constraints where Gemma4 (15 GB) + DeepSeek-Coder (8.85 GB) would exceed available Metal RAM",
-      "when": "The subagent-orchestrator skill evaluates the request",
+      "when": "The subagent-multiturn-prompting skill evaluates the request",
       "then": {
         "agent_behavior": [
           "Checks the combined memory footprint of requested profiles against available Metal RAM",
@@ -65,7 +65,7 @@
       "id": "beh-005",
       "name": "distinguishes-push-vs-pull-dispatch",
       "given": "A user asks: 'Run a code review on this PR' and also asks: 'Run a multi-pass research analysis with verification across 3 sources'",
-      "when": "The subagent-orchestrator skill evaluates each task",
+      "when": "The subagent-multiturn-prompting skill evaluates each task",
       "then": {
         "agent_behavior": [
           "Routes the PR review task as a push-model dispatch (single self-contained turn, no phase-state needed — may delegate to dispatch-opencode or direct ACP prompt)",
@@ -78,7 +78,7 @@
       "id": "beh-006",
       "name": "validates-orchestration-spec-before-dispatch",
       "given": "A user provides an orchestration specification file or JSON blob",
-      "when": "The subagent-orchestrator skill processes the spec",
+      "when": "The subagent-multiturn-prompting skill processes the spec",
       "then": {
         "agent_behavior": [
           "Calls scripts/validate-orchestration-spec.sh with the spec file or stdin",

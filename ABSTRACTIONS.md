@@ -117,7 +117,7 @@ Properties:
 - Artifact layout: `.dispatch-opencode/<task-id>/`
 - Works for: self-contained tasks, any model that handles large single prompts
 
-### Pull Model (subagent-orchestrator)
+### Pull Model (subagent-multiturn-prompting)
 
 ```
 Parent agent:  define(spec: profiles + turns + phase_handlers) → orchestrator

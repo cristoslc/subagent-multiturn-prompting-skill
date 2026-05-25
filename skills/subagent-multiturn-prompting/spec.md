@@ -1,4 +1,4 @@
-# subagent-orchestrator specification
+# subagent-multiturn-prompting specification
 
 ## What it should do
 - Teach agents when and how to construct an OrchestrationSpec for multi-turn, multi-model subagent dispatch with pull-model phase-state control
@@ -16,7 +16,7 @@
 - Must not attempt to load two models simultaneously on hardware where combined memory exceeds available Metal RAM
 
 ## Boundaries
-- Owns: skills/subagent-orchestrator/** (this skill directory)
+- Owns: skills/subagent-multiturn-prompting/** (this skill directory)
 - Reads but never writes: the orchestrator MCP server's configuration and profile registry
 - Forbidden: must never modify the host agent's AGENTS.md, .opencode/ directory, or agent profiles
 

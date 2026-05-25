@@ -1,6 +1,6 @@
 # PURPOSE
 
-subagent-orchestrator is a temporal steer-by-wire layer between a parent agent and its subagent fleet. It addresses three gaps in current agent infrastructure:
+subagent-multiturn-prompting is a temporal steer-by-wire layer between a parent agent and its subagent fleet. It addresses three gaps in current agent infrastructure:
 
 1. **Model-specific routing** — parent says "use Gemma4, temp 0.4, agent critic" for this task and "DeepSeek-Coder, agent explore" for that one. No existing tool maps task profiles to models with per-profile configuration.
 2. **Phase-state protocol** — subagents are long-lived entities that report progress (`phase=verify_complete`, `phase=degraded`) and request the next instruction set rather than receiving everything upfront. This is a pull model, not the push model of fire-and-forget subagent dispatch.
@@ -10,7 +10,7 @@ subagent-orchestrator is a temporal steer-by-wire layer between a parent agent a
 
 Current agent dispatch is push-based: "here is your entire task, go execute it." This works for Pattern 1-2 subagent dispatch (inline tool, fan-out) but breaks for models that need incremental context delivery.
 
-**subagent-orchestrator inverts this to pull-based.** The full task specification — all turn instructions, all model profiles, all temperatures — exists upfront. But the subagent controls pacing. When it reaches `phase=verify_complete`, it requests the next turn. The orchestrator serves it.
+**subagent-multiturn-prompting inverts this to pull-based.** The full task specification — all turn instructions, all model profiles, all temperatures — exists upfront. But the subagent controls pacing. When it reaches `phase=verify_complete`, it requests the next turn. The orchestrator serves it.
 
 This was empirically validated on M3 Pro 36GB with oMLX/Gemma4:
 - Single-turn push (1,277 tokens): 7/7, clean output
@@ -21,7 +21,7 @@ The pull model is not a convenience — it is a reliability requirement for cert
 
 ## Transport Layer
 
-subagent-orchestrator does not implement ACP itself. It delegates transport to `acpx` (Apache-2.0, 2.3k stars) which handles:
+subagent-multiturn-prompting does not implement ACP itself. It delegates transport to `acpx` (Apache-2.0, 2.3k stars) which handles:
 
 - `opencode acp` spawn and lifecycle
 - `initialize`, `newSession({ model, agent, cwd })`
@@ -32,15 +32,15 @@ The orchestrator operates one layer up: which model, which turn, which temperatu
 
 ## Relationship to dispatch-opencode
 
-**Neither subsumed nor wrapped.** dispatch-opencode is a transport adapter (ACP ↔ opencode) with a push model — fully-rendered task, per-kind permission allowlists, on-disk artifacts. subagent-orchestrator is a temporal orchestration layer with a pull model. They serve different consumers:
+**Neither subsumed nor wrapped.** dispatch-opencode is a transport adapter (ACP ↔ opencode) with a push model — fully-rendered task, per-kind permission allowlists, on-disk artifacts. subagent-multiturn-prompting is a temporal orchestration layer with a pull model. They serve different consumers:
 
-| | dispatch-opencode | subagent-orchestrator |
+| | dispatch-opencode | subagent-multiturn-prompting |
 |---|---|---|
 | Model | Push — task rendered upfront | Pull — subagent requests next turn |
 | Scope | Dispatch, permissions, artifacts | Routing, phase-state, model lifecycle |
 | Transport | Built-in client or acpx | acpx exclusively |
 
-subagent-orchestrator uses acpx directly. dispatch-opencode remains available for push-model dispatch where it fits.
+subagent-multiturn-prompting uses acpx directly. dispatch-opencode remains available for push-model dispatch where it fits.
 
 ## Harness Integration
 

@@ -6,7 +6,7 @@
 Host Agent (Claude Code, opencode, Codex, Gemini CLI)
   │ calls MCP tools
   ▼
-subagent-orchestrator (MCP server)
+subagent-multiturn-prompting (MCP server)
   │ per-turn: acpx → opencode acp → model (Gemma4 / DeepSeek-Coder)
   │ manages: phase-state, model lifecycle, turn routing
   ▼
