@@ -1,0 +1,20 @@
+[project]
+name = "subagent-multiturn-prompting"
+version = "0.1.0"
+description = "Pull-model progressive disclosure layer for multi-turn subagent prompting."
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.27.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
+]
