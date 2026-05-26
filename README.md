@@ -1,73 +1,47 @@
 # subagent-multiturn-prompting
 
-Temporal steer-by-wire for multi-model subagent fleets.
+Progressive-disclosure protocol for single-agent multi-turn prompts. Defines the OrchestrationSpec schema, turn sequencing, and validation — consumed by existing harnesses, not a runtime.
 
 ## Status
 
-**Spec complete, pre-runnable.** The skill definition, schema references, behavioral/adversarial tests, and a spec-validation script are all written and passing. The orchestrator implementation (MCP server, acpx transport binding, and model-lifecycle runtime) has not yet been built. This skill is currently **read-only** — it teaches an agent how to construct and validate `OrchestrationSpec`s, but cannot dispatch them.
-
-| Component | State |
-|---|---|
-| `spec.md`, `PURPOSE.md`, `ARCHITECTURE.md`, `ABSTRACTIONS.md` | **Done** |
-| `SKILL.md` + `references/` (`orchestration-spec-schema.md`, `model-profiles.md`) | **Done** |
-| `scripts/validate-orchestration-spec.sh` + acceptance tests | **Done** (12/12 passing) |
-| `tests/behavioral-tests.json` | **Evaluated** (27/27 passing) |
-| `tests/adversarial-tests.json` | **Written**, not yet evaluated |
-| Runtime: MCP server, acpx transport, model lifecycle | **Not started** |
-
-## Quickstart
-
-Read `PURPOSE.md` for the architectural thesis and `ABSTRACTIONS.md` for data structures.
-
-## Key References
-
-- `skills/subagent-multiturn-prompting/SKILL.md` — skill definition loaded by the host agent
-- `skills/subagent-multiturn-prompting/spec.md` — intent, boundaries, and script contracts
-- `skills/subagent-multiturn-prompting/references/orchestration-spec-schema.md` — complete field reference
-- `skills/subagent-multiturn-prompting/references/model-profiles.md` — default profile registry and hardware constraints
-- Related: `../dispatch-opencode-skill/` — ACP transport adapter (complement, not dependency)
-- Transport: `acpx` — the ACP client this orchestrator will call (https://github.com/nicolaide/acpx)
+**Spec phase.** Schema defined, validation script exists, behavioral tests passing (27/27). No MCP server or runtime code.
 
 ## Project Layout
 
 ```
 subagent-multiturn-prompting-skill/
-├── README.md              # this file
-├── PURPOSE.md             # architectural thesis and constraints
-├── ARCHITECTURE.md        # layer stack, core loop, MCP tool surface
-├── ABSTRACTIONS.md        # data structures and detection algorithms
+├── PURPOSE.md
+├── ARCHITECTURE.md
+├── ABSTRACTIONS.md
+├── README.md
 ├── skills/
 │   └── subagent-multiturn-prompting/
-│       ├── SKILL.md       # skill definition (complete)
-│       ├── spec.md        # lightweight intent + script contracts
+│       ├── SKILL.md
+│       ├── spec.md
 │       ├── references/
 │       │   ├── orchestration-spec-schema.md
 │       │   └── model-profiles.md
 │       ├── scripts/
 │       │   └── validate-orchestration-spec.sh
 │       └── tests/
-│           ├── behavioral-tests.json
+│           ├── behavioral-tests.json      (27/27 passing)
 │           ├── adversarial-tests.json
-│           ├── test-validate-orchestration-spec.sh
 │           └── .eval-results.json
 ```
 
-`docs/` and `src/` listed in earlier layout drafts have been removed until the runtime implementation starts.
+## How It Works
 
-## Design Decisions
+A harness serves two MCP tools:
+- `multiturn_run(spec)` — accept an OrchestrationSpec, return a run_id
+- `multiturn_prompt(run_id)` — return the next progressive-disclosure chunk for the subagent
 
-1. **Pull model over push.** Subagents request turns; they do not receive a pre-rendered monolith.
-2. **acpx for transport.** Do not re-implement ACP client logic.
-3. **MCP server interface.** The orchestrator is a tool the host agent calls via MCP, not a separate agent runtime.
-4. **Phase-state protocol is the core primitive.** Turn sequencing, degraded escalation, and model hot-switching all hang off phase reports.
+The subagent invokes `multiturn_prompt` when ready for the next turn. The harness manages subagent session lifecycle.
 
-## Roadmap
+## Related
 
-1. ~~**Spec phase**~~ ✅ — swain-design artifacts, schema, and model-lifecycle constraints defined.
-2. **Prototype** — MCP server with hardcoded turn specs for Gemma4 critic test. Validate pull model end-to-end. *Blocked on `src/` implementation and acpx integration.*
-3. **Generalize** — configurable turn specs, model profile registry, degraded-state escalation rules.
-4. **Harness integration** — test against Claude Code, opencode, and dispatch-opencode transport.
+- `subagent-rank-based-orchestrator` — concurrent fleet dispatch with capability ranks (Novice→Grandmaster). Uses this project's spec format internally for subagent turn serving.
+- `validate-orchestration-spec.sh` — validates OrchestrationSpec JSON before dispatch
 
 ## License
 
-MIT (planned — aligns with trove sources and ecosystem norms)
+MIT

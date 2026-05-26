@@ -9,7 +9,7 @@ Complete field reference for every data structure in an OrchestrationSpec.
 | `task_id` | string | yes | Unique run identifier |
 | `profiles` | dict[str, ModelProfile] | yes | Profile name → profile config |
 | `turns` | list[TurnSpec] | yes | Ordered turn sequence |
-| `phase_handlers` | dict[str, PhaseHandler] | no | Per-phase behavior overrides |
+| `phase_handlers` | dict[str, PhaseHandler] | no | Per-phase behavior instructions for the harness |
 | `escalation_policy` | EscalationPolicy | yes | Failure recovery configuration |
 
 ### EscalationPolicy
@@ -26,10 +26,8 @@ Complete field reference for every data structure in an OrchestrationSpec.
 |---|---|---|---|
 | `name` | string | yes | Profile name ("explorer", "critic", "thinker") |
 | `model` | string | yes | Model path or repo |
-| `agent` | string | yes | opencode agent name ("explore", "general", "build") |
 | `temperature` | float | yes | 0.0–1.0 |
 | `max_tokens_default` | int | yes | Fallback if TurnSpec doesn't override |
-| `memory_gb` | float | yes | Expected RAM usage for lifecycle management |
 | `degenerate_risk` | DegenerateRisk | yes | Known failure modes for this model |
 
 ### DegenerateRisk
@@ -52,6 +50,8 @@ Complete field reference for every data structure in an OrchestrationSpec.
 
 ## Phase
 
+The harness tracks subagent state through phases:
+
 ```python
 class Phase(Enum):
     SPAWNING = "spawning"               # agent transport is being initialized
@@ -61,11 +61,13 @@ class Phase(Enum):
     TOOL_CALLING = "tool_calling"       # agent is making tool calls
     VERIFY_COMPLETE = "verify_complete" # turn complete, ready for next
     DEGRADED = "degraded"              # output quality below threshold
-    ERROR = "error"                     # turn failed (OOM, timeout, bad response)
-    DONE = "done"                       # all turns complete, result ready
+    ERROR = "error"                     # turn failed
+    DONE = "done"                       # all turns complete
 ```
 
 ## PhaseHandler
+
+Instructions for the harness on how to respond to phase transitions:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -74,9 +76,11 @@ class Phase(Enum):
 | `config_override` | dict | no | If action modifies config (e.g., `{"temp": 0.5}`) |
 | `max_occurrences` | int | no | Max times per run (default: unlimited) |
 
+The harness interprets these instructions when it detects the corresponding phase from the subagent.
+
 ## PhaseReport
 
-What the subagent sends back at phase transitions:
+What the subagent sends back at phase transitions (harness-dependent):
 
 | Field | Type | Description |
 |---|---|---|

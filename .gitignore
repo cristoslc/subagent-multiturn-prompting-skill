@@ -23,26 +23,6 @@ Icon
 *.sublime-workspace
 *.sublime-project
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-*.egg-info/
-dist/
-build/
-*.egg
-.Python
-env/
-venv/
-.venv/
-
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
 # Environment
 .env
 .env.local
@@ -56,3 +36,6 @@ logs/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Worktrees
+.worktrees/
